@@ -12,6 +12,23 @@ st.set_page_config(
     layout="wide"
 )
 
+# Fonction pour charger votre vrai modèle
+@st.cache_data
+def load_model_and_info():
+    try:
+        model = pickle.load(open('xgb_model.pkl', 'rb'))
+        feature_info = pickle.load(open('feature_info.pkl', 'rb'))
+        return model, feature_info
+    except FileNotFoundError:
+        st.error("❌ Fichiers modèle non trouvés ! Assurez-vous d'avoir xgb_model.pkl et feature_info.pkl dans le dossier.")
+        st.stop()
+
+# Charger le modèle et les informations
+model, feature_info = load_model_and_info()
+
+# Utiliser les vraies plages de valeurs
+ranges = feature_info['feature_ranges']
+
 # Titre principal
 st.title("🏡 Prédicteur de Prix de Maisons")
 st.markdown("### Obtenez une estimation du prix de votre maison en quelques clics !")
@@ -57,23 +74,6 @@ garage_area = st.sidebar.slider(
     value=int((ranges['GarageArea']['min'] + ranges['GarageArea']['max']) / 2),
     help="Surface du garage en pieds carrés"
 )
-
-# Fonction pour charger votre vrai modèle
-@st.cache_data
-def load_model_and_info():
-    try:
-        model = pickle.load(open('xgb_model.pkl', 'rb'))
-        feature_info = pickle.load(open('feature_info.pkl', 'rb'))
-        return model, feature_info
-    except FileNotFoundError:
-        st.error("❌ Fichiers modèle non trouvés ! Assurez-vous d'avoir xgb_model.pkl et feature_info.pkl dans le dossier.")
-        st.stop()
-
-# Charger le modèle et les informations
-model, feature_info = load_model_and_info()
-
-# Utiliser les vraies plages de valeurs
-ranges = feature_info['feature_ranges']
 
 # Prédiction
 if st.sidebar.button("🔮 Prédire le prix", type="primary"):
